@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EquipmentHub Pro | Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --accent: #4895ef;
+      --success: #4cc9f0;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --light-gray: #e9ecef;
+      --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+      --sidebar-width: 260px;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
+      min-height: 100vh;
+      color: var(--dark);
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      min-height: 100vh;
+      transition: var(--transition);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 1.5rem 1rem;
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      width: var(--sidebar-width);
+      height: 100vh;
+      z-index: 100;
+      overflow-y: auto;
+      transition: var(--transition);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+      padding: 0 0.5rem;
+    }
+
+    .brand-icon {
+      background: rgba(255, 255, 255, 0.2);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.9rem 1rem;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: var(--transition);
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    .nav-link i {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      grid-column: 2;
+      padding: 2rem;
+      transition: var(--transition);
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 1rem 2rem;
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .hamburger {
+      display: none;
+      background: transparent;
+      border: none;
+      color: var(--primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: var(--transition);
+    }
+
+    .hamburger:hover {
+      background: var(--light-gray);
+    }
+
+    .title h2 {
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .title h2 span {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .profile-area {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .profile-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+    }
+
+    .logout-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logout-btn:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    /* Dashboard Content */
+    .dashboard-content {
+      display: block;
+    }
+
+    .bookings-content, .history-content, 
+    .favorites-content, .settings-content, 
+    .support-content {
+      display: none;
+    }
+
+    /* Section Header */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--dark);
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+
+    .stat-icon.primary {
+      background: rgba(67, 97, 238, 0.1);
+      color: var(--primary);
+    }
+
+    .stat-icon.success {
+      background: rgba(76, 201, 240, 0.1);
+      color: var(--success);
+    }
+
+    .stat-icon.accent {
+      background: rgba(72, 149, 239, 0.1);
+      color: var(--accent);
+    }
+
+    .stat-info h3 {
+      font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-info p {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    .search-bar {
+      display: flex;
+      background: white;
+      border-radius: 10px;
+      padding: 0.5rem 1rem;
+      width: 300px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-bar input {
+      border: none;
+      outline: none;
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .search-bar button {
+      background: transparent;
+      border: none;
+      color: var(--gray);
+      cursor: pointer;
+    }
+
+    .equipment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.8rem;
+    }
+
+    .equipment-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .equipment-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--success);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      z-index: 2;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-bottom: 1px solid var(--light-gray);
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+
+    .card-description {
+      color: var(--gray);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+
+    .card-category {
+      background: rgba(67, 97, 238, 0.1);
+      color: var(--primary);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .card-price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .card-price span {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--gray);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.8rem;
+    }
+
+    .btn-details {
+      flex: 1;
+      background: var(--light-gray);
+      color: var(--dark);
+      border: none;
+      padding: 0.7rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-details:hover {
+      background: #d8dbe0;
+    }
+
+    .btn-book {
+      flex: 1;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-book:hover {
+      background: var(--secondary);
+    }
+
+    /* Booking History Table */
+    .booking-table {
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      border-collapse: collapse;
+    }
+
+    .booking-table thead {
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+    }
+
+    .booking-table th {
+      padding: 1.2rem 1.5rem;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .booking-table td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--light-gray);
+    }
+
+    .booking-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .booking-table tbody tr:hover {
+      background-color: rgba(67, 97, 238, 0.05);
+    }
+
+    .status-badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-confirmed {
+      background: rgba(76, 201, 240, 0.15);
+      color: var(--success);
+    }
+
+    .status-pending {
+      background: rgba(255, 193, 7, 0.15);
+      color: #ffc107;
+    }
+
+    .status-completed {
+      background: rgba(40, 167, 69, 0.15);
+      color: #28a745;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+      transform: translateY(30px);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .modal-backdrop.active .modal {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .modal-header {
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 20px 20px 0 0;
+      text-align: center;
+    }
+
+    .modal-header h3 {
+      font-weight: 600;
+      font-size: 1.5rem;
+    }
+
+    .modal-body {
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .modal-body p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+      color: var(--dark);
+    }
+
+    .modal-icon {
+      font-size: 3.5rem;
+      color: var(--success);
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 0.8rem 1.8rem;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      font-size: 1rem;
+    }
+
+    .btn-cancel {
+      background: var(--light-gray);
+      color: var(--dark);
+    }
+
+    .btn-cancel:hover {
+      background: #d8dbe0;
+    }
+
+    .btn-confirm {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-confirm:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: white;
+      color: var(--dark);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2000;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: var(--transition);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      border-left: 5px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 5px solid #e63946;
+    }
+
+    .toast i {
+      font-size: 1.5rem;
+    }
+
+    .toast.success i {
+      color: var(--success);
+    }
+
+    .toast.error i {
+      color: #e63946;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .dashboard-container {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        grid-column: 1;
+        padding: 1rem;
+      }
+
+      .top-bar {
+        padding: 1rem;
+      }
+
+      .hamburger {
+        display: block;
+      }
+
+      .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .search-bar {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-container {
+        grid-template-columns: 1fr;
+      }
+
+      .equipment-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-area {
+        flex-direction: row;
+      }
+
+      .booking-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fas fa-tools"></i>
+        </div>
+        <h1>EquipmentHub</h1>
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#" class="nav-link active" data-target="dashboard-content">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" data-target="bookings-content">
+            <i class="fas fa-calendar-alt"></i>
+            <span>My Bookings</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" data-target="history-content">
+            <i class="fas fa-history"></i>
+            <span>Booking History</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" data-target="favorites-content">
+            <i class="fas fa-heart"></i>
+            <span>Favorites</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" data-target="settings-content">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" data-target="support-content">
+            <i class="fas fa-question-circle"></i>
+            <span>Support</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <button class="hamburger" id="hamburger">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="title">
+          <h2>Welcome back, <span id="customerName">Kelson Banda</span></h2>
+        </div>
+        <div class="profile-area">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&h=200&q=80" id="customerPic" alt="Profile" class="profile-img">
+          <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </header>
+
+      <!-- Dashboard Content -->
+      <section class="dashboard-content" id="dashboard-content">
+        <div class="section-header">
+          <h3 class="section-title">Available Equipment</h3>
+          <div class="search-bar">
+            <input type="text" placeholder="Search equipment...">
+            <button><i class="fas fa-search"></i></button>
+          </div>
+        </div>
+        
+        <div class="stats-container">
+          <div class="stat-card">
+            <div class="stat-icon primary">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="stat-info">
+              <h3>12</h3>
+              <p>Active Bookings</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon success">
+              <i class="fas fa-history"></i>
+            </div>
+            <div class="stat-info">
+              <h3>42</h3>
+              <p>Past Rentals</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon accent">
+              <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-info">
+              <h3>8</h3>
+              <p>Favorites</p>
+            </div>
+          </div>
+        </div>
+        
+        <div id="equipmentList" class="equipment-grid">
+          <!-- Equipment cards will be dynamically inserted here -->
+        </div>
+      </section>
+
+      <!-- My Bookings Content -->
+      <section class="bookings-content" id="bookings-content">
+        <div class="section-header">
+          <h3 class="section-title">My Bookings</h3>
+        </div>
+        
+        <div class="booking-table-container">
+          <table class="booking-table">
+            <thead>
+              <tr>
+                <th>Equipment</th>
+                <th>Category</th>
+                <th>Booking Date</th>
+                <th>Duration</th>
+                <th>Total Cost</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Excavator CAT 320</td>
+                <td>Heavy Machinery</td>
+                <td>Jun 15, 2025</td>
+                <td>5 days</td>
+                <td>K4,250</td>
+                <td><span class="status-badge status-confirmed">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td>Mobile Crane 50T</td>
+                <td>Lifting Equipment</td>
+                <td>Jun 18, 2025</td>
+                <td>3 days</td>
+                <td>K3,600</td>
+                <td><span class="status-badge status-confirmed">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td>Scissor Lift 30ft</td>
+                <td>Access Equipment</td>
+                <td>Jun 20, 2025</td>
+                <td>7 days</td>
+                <td>K1,750</td>
+                <td><span class="status-badge status-pending">Pending</span></td>
+              </tr>
+              <tr>
+                <td>Forklift 5T</td>
+                <td>Material Handling</td>
+                <td>Jun 22, 2025</td>
+                <td>2 days</td>
+                <td>K640</td>
+                <td><span class="status-badge status-pending">Pending</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Booking History Content -->
+      <section class="history-content" id="history-content">
+        <div class="section-header">
+          <h3 class="section-title">Booking History</h3>
+        </div>
+        
+        <div class="booking-table-container">
+          <table class="booking-table">
+            <thead>
+              <tr>
+                <th>Equipment</th>
+                <th>Category</th>
+                <th>Booking Date</th>
+                <th>Duration</th>
+                <th>Total Cost</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Bulldozer Komatsu D65</td>
+                <td>Heavy Machinery</td>
+                <td>May 28, 2025</td>
+                <td>4 days</td>
+                <td>K3,000</td>
+                <td><span class="status-badge status-completed">Completed</span></td>
+              </tr>
+              <tr>
+                <td>Concrete Mixer Truck</td>
+                <td>Construction Vehicles</td>
+                <td>May 15, 2025</td>
+                <td>3 days</td>
+                <td>K1,950</td>
+                <td><span class="status-badge status-completed">Completed</span></td>
+              </tr>
+              <tr>
+                <td>Excavator CAT 320</td>
+                <td>Heavy Machinery</td>
+                <td>Apr 30, 2025</td>
+                <td>7 days</td>
+                <td>K5,950</td>
+                <td><span class="status-badge status-completed">Completed</span></td>
+              </tr>
+              <tr>
+                <td>Mobile Crane 50T</td>
+                <td>Lifting Equipment</td>
+                <td>Apr 12, 2025</td>
+                <td>2 days</td>
+                <td>K2,400</td>
+                <td><span class="status-badge status-completed">Completed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Other sections (Favorites, Settings, Support) -->
+      <section class="favorites-content" id="favorites-content">
+        <div class="section-header">
+          <h3 class="section-title">Favorites</h3>
+        </div>
+        <div class="equipment-grid">
+          <!-- Favorite equipment will be shown here -->
+        </div>
+      </section>
+      
+      <section class="settings-content" id="settings-content">
+        <div class="section-header">
+          <h3 class="section-title">Account Settings</h3>
+        </div>
+        <div class="stat-card">
+          <p>Account settings will be displayed here...</p>
+        </div>
+      </section>
+      
+      <section class="support-content" id="support-content">
+        <div class="section-header">
+          <h3 class="section-title">Support Center</h3>
+        </div>
+        <div class="stat-card">
+          <p>Support information will be displayed here...</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-backdrop" id="confirmBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Confirm Booking</h3>
+      </div>
+      <div class="modal-body">
+        <div class="modal-icon">
+          <i class="fas fa-question-circle"></i>
+        </div>
+        <p>Are you sure you want to book this equipment?</p>
+        <div class="modal-actions">
+          <button class="modal-btn btn-cancel" id="cancelBookBtn">Cancel</button>
+          <button class="modal-btn btn-confirm" id="confirmBookBtn">Confirm Booking</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="errorToast">
+    <i class="fas fa-check-circle"></i>
+    <div class="toast-content">
+      <div class="toast-message">Booking successful!</div>
+    </div>
+  </div>
+
+  <script>
+    // Mock data for equipment
+    const equipmentData = [
+      {
+        id: "eq1",
+        name: "Excavator CAT 320",
+        description: "Heavy-duty excavator with advanced hydraulic system for efficient digging and lifting operations.",
+        type: "Heavy Machinery",
+        price: 850,
+        image: "uploads/1750131770667.jpg"
+      },
+      {
+        id: "eq2",
+        name: "Bulldozer Komatsu D65",
+        description: "Powerful bulldozer with GPS technology for precise grading and earthmoving tasks.",
+        type: "Heavy Machinery",
+        price: 750,
+        image: "uploads/mine-3289851_1280.jpg"
+      },
+      {
+        id: "eq3",
+        name: "Mobile Crane 50T",
+        description: "Versatile mobile crane with 50-ton lifting capacity and 40m boom length.",
+        type: "Lifting Equipment",
+        price: 1200,
+        image: "uploads/excavator-5556325_1280.jpg"
+      },
+      {
+        id: "eq4",
+        name: "Concrete Mixer Truck",
+        description: "9m³ capacity concrete mixer with rotating drum for efficient concrete transportation.",
+        type: "Construction Vehicles",
+        price: 650,
+        image: "uploads/truck-16021_1280.jpg"
+      },
+      {
+        id: "eq5",
+        name: "Scissor Lift 30ft",
+        description: "Electric scissor lift with 30ft working height and 750lb capacity. Ideal for indoor use.",
+        type: "Access Equipment",
+        price: 250,
+        image: "uploads/transportation-4839272_1280.jpg"
+      },
+      {
+        id: "eq6",
+        name: "Forklift 5T",
+        description: "Diesel forklift with 5-ton lifting capacity and 6m lift height. Excellent for warehouse operations.",
+        type: "Material Handling",
+        price: 320,
+        image: "uploads/forklift-2660508_1280.jpg"
+      }
+    ];
+
+    // DOM Elements
+    const elements = {
+      customerName: document.getElementById('customerName'),
+      customerPic: document.getElementById('customerPic'),
+      equipmentList: document.getElementById('equipmentList'),
+      confirmBackdrop: document.getElementById('confirmBackdrop'),
+      confirmBookBtn: document.getElementById('confirmBookBtn'),
+      cancelBookBtn: document.getElementById('cancelBookBtn'),
+      errorToast: document.getElementById('errorToast'),
+      hamburger: document.getElementById('hamburger'),
+      sidebar: document.getElementById('sidebar'),
+      navLinks: document.querySelectorAll('.nav-link'),
+      contentSections: document.querySelectorAll('section[id$="-content"]')
+    };
+
+    let selectedEquipmentId = null;
+
+    // Initialize Dashboard
+    function initDashboard() {
+      renderEquipment();
+      setupEventListeners();
+    }
+
+    // Render Equipment
+    function renderEquipment() {
+      elements.equipmentList.innerHTML = equipmentData.map(eq => `
+        <div class="equipment-card">
+          <div class="card-badge">Available</div>
+          <img src="${eq.image}" alt="${eq.name}" class="card-image">
+          <div class="card-content">
+            <h4 class="card-title">${eq.name}</h4>
+            <p class="card-description">${eq.description}</p>
+            <div class="card-meta">
+              <div class="card-category">${eq.type}</div>
+              <div class="card-price">K${eq.price}<span>/day</span></div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-details">
+                <i class="fas fa-info-circle"></i> Details
+              </button>
+              <button class="btn-book" data-id="${eq.id}">
+                <i class="fas fa-calendar-check"></i> Book Now
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Setup Event Listeners
+    function setupEventListeners() {
+      // Book buttons
+      document.querySelectorAll('.btn-book').forEach(button => {
+        button.addEventListener('click', function() {
+          openConfirm(this.dataset.id);
+        });
+      });
+      
+      // Modal buttons
+      elements.confirmBookBtn.addEventListener('click', confirmBooking);
+      elements.cancelBookBtn.addEventListener('click', closeConfirm);
+      
+      // Modal backdrop click
+      elements.confirmBackdrop.addEventListener('click', function(e) {
+        if (e.target === this) closeConfirm();
+      });
+      
+      // Hamburger menu
+      elements.hamburger.addEventListener('click', function() {
+        elements.sidebar.classList.toggle('active');
+      });
+      
+      // Navigation links
+      elements.navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Update active state
+          elements.navLinks.forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Show the target section
+          const targetId = this.dataset.target;
+          showSection(targetId);
+          
+          // Close sidebar on mobile
+          if (window.innerWidth < 992) {
+            elements.sidebar.classList.remove('active');
+          }
+        });
+      });
+    }
+
+    // Show specific section
+    function showSection(sectionId) {
+      // Hide all sections
+      elements.contentSections.forEach(section => {
+        section.style.display = 'none';
+      });
+      
+      // Show the requested section
+      document.getElementById(sectionId).style.display = 'block';
+    }
+
+    // Open Confirmation Modal
+    function openConfirm(id) {
+      selectedEquipmentId = id;
+      elements.confirmBackdrop.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close Confirmation Modal
+    function closeConfirm() {
+      selectedEquipmentId = null;
+      elements.confirmBackdrop.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Confirm Booking
+    function confirmBooking() {
+      if (!selectedEquipmentId) return;
+      
+      // In a real app, this would be an API call
+      setTimeout(() => {
+        closeConfirm();
+        showToast('Booking successful! Equipment reserved for you.', 'success');
+      }, 800);
+    }
+
+    // Show Toast Notification
+    function showToast(message, type = 'success') {
+      const toast = elements.errorToast;
+      toast.querySelector('.toast-message').textContent = message;
+      toast.className = `toast ${type} show`;
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    }
+
+    // Logout Function
+    function logout() {
+      showToast('You have been logged out successfully', 'success');
+      setTimeout(() => {
+        alert('You have been logged out. Redirecting to login page...');
+        window.location.href = 'index.html';
+      }, 1500);
+    }
+
+    // Initialize dashboard when page loads
+    document.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>

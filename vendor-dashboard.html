@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mining Vendor Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+ <link rel="stylesheet" href="css/vendor-dashboard.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>MineRent</h2>
+    <a href="#" class="active" onclick="navigate('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="#" onclick="openUploadModal()"><i class="fas fa-upload"></i> Upload Equipment</a>
+    <a href="#" onclick="navigate('myListings')"><i class="fas fa-list"></i> My Listings</a>
+    <a href="#" onclick="navigate('messages')"><i class="fas fa-envelope"></i> Messages <span id="msgBadge" style="background:#ff4757;color:white;padding:2px 6px;border-radius:12px;font-size:12px;display:none;">0</span></a>
+    <a href="#" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </aside>
+
+  <main class="main">
+    <header>
+      <div><h1 id="pageTitle">Dashboard</h1></div>
+      <div class="profile" onclick="toggleDrop()">
+        <img src="/uploads/1750131770667.jpg" id="profilePic" onerror="this.src='/uploads/default.png'">
+        <span id="vendorName">Vendor</span>
+        <div class="dropdown" id="profileDropdown">
+          <a href="#" onclick="navigate('profile')">Profile</a>
+          <a href="#" onclick="confirmLogout()">Logout</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="section">
+      <div class="summary">
+        <div class="card"><i class="fas fa-database"></i><div class="info"><h3>Uploaded Items</h3><p id="uploadedCount">0</p></div></div>
+        <div class="card"><i class="fas fa-calendar-check"></i><div class="info"><h3>Pending Bookings</h3><p id="pendingCount">0</p></div></div>
+        <div class="card"><i class="fas fa-wallet"></i><div class="info"><h3>Total Earnings</h3><p id="earnings">K0</p></div></div>
+      </div>
+      <div class="shortcuts">
+        <div class="card" onclick="openUploadModal()"><i class="fas fa-upload"></i><div class="info"><h3>Upload</h3><p>New equipment</p></div></div>
+        <div class="card" onclick="navigate('myListings')"><i class="fas fa-list"></i><div class="info"><h3>Listings</h3><p>View your items</p></div></div>
+        <div class="card" onclick="navigate('messages')"><i class="fas fa-envelope"></i><div class="info"><h3>Messages</h3><p>Check inbox</p></div></div>
+      </div>
+    </section>
+
+    <!-- Listings Section -->
+    <section id="myListings" class="section" style="display:none;">
+      <h2>My Listings</h2><div id="equipmentGrid"></div>
+    </section>
+
+    <!-- Messages Section -->
+    <section id="messages" class="section" style="display:none;">
+      <h2>Messages</h2><div id="messageContainer"></div>
+    </section>
+  </main>
+
+  <!-- Upload Modal -->
+  <div class="modal-backdrop" id="backdrop"></div>
+  <div class="modal" id="uploadModal">
+    <div class="modal-header">
+      <h3>Upload Equipment</h3><span class="modal-close" onclick="closeUploadModal()">×</span>
+    </div>
+    <form id="uploadForm">
+      <input type="hidden" name="vendor_id" id="vendorId">
+      <label>Name:</label><input type="text" name="name" required>
+      <label>Category:</label>
+      <select name="type" required>
+        <option>Drilling</option>
+        <option>Crushing</option>
+        <option>Excavation</option>
+        <option>Screening</option>
+      </select>
+      <label>Price (K/day):</label><input type="number" name="price" required>
+      <label>Image:</label><input type="file" name="image" accept="image/*" required>
+      <label>Description:</label><textarea name="description" required></textarea>
+      <button type="submit">Upload</button>
+    </form>
+  </div>
+
+  <!-- Logout Modal -->
+  <div class="modal-backdrop" id="logoutBackdrop"></div>
+  <div class="modal" id="logoutModal">
+    <div class="modal-header">
+      <h3>Confirm Logout?</h3><span class="modal-close" onclick="cancelLogout()">×</span>
+    </div>
+    <button onclick="logout()" style="background:#ff4757;color:white;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;">Yes, Logout</button>
+    <button onclick="cancelLogout()" style="margin-left:10px;padding:10px 20px;border:none;border-radius:4px;">Cancel</button>
+  </div>
+
+  <script>
+
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!user) {
+      alert("Session expired. Please log in again.");
+      window.location.href = '/login.html';
+    } else {
+      document.getElementById('vendorName').innerText = user.name || 'Vendor';
+      document.getElementById('vendorId').value = user.id;
+      if (user.profile_pic) {
+        document.getElementById('profilePic').src = `/uploads/${user.profile_pic}`;
+      }
+    }
+
+    function navigate(sec) {
+      document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+      document.getElementById(sec).style.display = 'block';
+      document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+      const link = [...document.querySelectorAll('.sidebar a')].find(a => a.innerText.includes(sec === 'dashboard' ? 'Dashboard' : sec === 'myListings' ? 'My Listings' : 'Messages'));
+      if (link) link.classList.add('active');
+      document.getElementById('pageTitle').innerText = sec === 'dashboard' ? 'Dashboard' : sec === 'myListings' ? 'My Listings' : 'Messages';
+      if (sec === 'dashboard') loadDashboardStats();
+      if (sec === 'myListings') loadListings();
+      if (sec === 'messages') loadMessages();
+    }
+
+    function loadDashboardStats() {
+      fetch(`/api/vendor/stats/${user.id}`)
+        .then(r => r.json())
+        .then(d => {
+          document.getElementById('uploadedCount').innerText = d.uploaded || 0;
+          document.getElementById('pendingCount').innerText = d.pending || 0;
+          document.getElementById('earnings').innerText = 'K' + (d.earnings || 0);
+        });
+    }
+
+    function loadListings() {
+      fetch(`/api/vendor/my-equipment/${user.id}`)
+        .then(r => r.json())
+        .then(list => {
+          const c = document.getElementById('equipmentGrid');
+          c.innerHTML = '';
+          list.forEach(i => {
+            const div = document.createElement('div');
+            div.className = 'equip-card';
+            div.innerHTML = `<img src="/uploads/${i.image}" alt="${i.name}"><h4>${i.name}</h4><p>K${i.price}/day</p>`;
+            c.appendChild(div);
+          });
+        });
+    }
+
+    function loadMessages() {
+      fetch(`/api/vendor/messages/${user.id}`)
+        .then(r => r.json())
+        .then(msgs => {
+          const c = document.getElementById('messageContainer');
+          c.innerHTML = '';
+          msgs.forEach(m => c.innerHTML += `<div><strong>${m.sender}:</strong> ${m.content}</div>`);
+          document.getElementById('msgBadge').innerText = msgs.length;
+          document.getElementById('msgBadge').style.display = msgs.length ? 'inline-block' : 'none';
+        });
+    }
+
+    function openUploadModal() {
+      document.getElementById('backdrop').style.display = 'block';
+      document.getElementById('uploadModal').style.display = 'block';
+    }
+
+    function closeUploadModal() {
+      document.getElementById('backdrop').style.display = 'none';
+      document.getElementById('uploadModal').style.display = 'none';
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      fetch('/upload-equipment', { method: 'POST', body: fd })
+        .then(r => r.text()).then(res => {
+          alert(res);
+          closeUploadModal();
+          loadDashboardStats();
+        });
+    });
+
+    function confirmLogout() {
+      document.getElementById('logoutBackdrop').style.display = 'block';
+      document.getElementById('logoutModal').style.display = 'block';
+    }
+
+    function cancelLogout() {
+      document.getElementById('logoutBackdrop').style.display = 'none';
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/login.html';
+    }
+
+    function toggleDrop() {
+      const d = document.getElementById('profileDropdown');
+      d.style.display = d.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Default load
+    navigate('dashboard');
+  </script>
+
+  <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+  <i class="fas fa-bars"></i>
+</button>
+
+</body>
+</html>
