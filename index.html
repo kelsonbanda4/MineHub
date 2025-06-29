@@ -673,8 +673,8 @@
       </div>
       <ul class="nav-links">
         <li><a href="#home">Home</a></li>
-        <li><a href="#login">Login / Register</a></li>
-        <li><a href="#about">About</a></li>
+        <li><a href="login.html">Login</a></li>
+        <li><a href="about.html">About</a></li>
         <li><a href="#features">Features</a></li>
         <li><a href="#announcements">Announcements</a></li>
         <li><a href="#testimonials">Testimonials</a></li>
@@ -695,7 +695,7 @@
         <div class="slide-content">
           <h2>Powering Mining Operations</h2>
           <p>Access the latest mining equipment without the capital investment. Rent what you need, when you need it.</p>
-          <a href="#login" class="cta-button">Get Started</a>
+          <a href="login.html" class="cta-button">Get Started</a>
         </div>
       </div>
       
@@ -715,7 +715,7 @@
         <div class="slide-content">
           <h2>Trusted by Mining Professionals</h2>
           <p>Join thousands of satisfied miners who rely on our platform for their equipment rental needs.</p>
-          <a href="#login" class="cta-button">Join Now</a>
+          <a href="register.html" class="cta-button">Join Now</a>
         </div>
       </div>
       
@@ -875,7 +875,7 @@
           <h3>Get In Touch</h3>
           <p><i class="fas fa-map-marker-alt"></i> 123 Mining Avenue, Kitwe, Zambia</p>
           <p><i class="fas fa-envelope"></i> support@minerenthub.com</p>
-          <p><i class="fas fa-phone"></i> +260 976065666</p>
+          <p><i class="fas fa-phone"></i> +260 950600009</p>
           <p><i class="fas fa-clock"></i> Monday - Friday: 8:00 AM - 6:00 PM</p>
           <p><i class="fas fa-clock"></i> Saturday: 9:00 AM - 1:00 PM</p>
         </div>
@@ -993,10 +993,11 @@
       dots[currentSlide].classList.add('active');
     }
     
-    // Auto slide every 10 seconds
+    // Auto slide every 8
+    seconds
     setInterval(() => {
       showSlide(currentSlide + 1);
-    }, 10000);
+    }, 8000);
     
     // Dot navigation
     dots.forEach((dot, index) => {
